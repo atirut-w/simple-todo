@@ -10,16 +10,17 @@ import java.util.Scanner;
 
 public class MainWindow extends JFrame {
     private JPanel mainPanel;
-    private JTextArea taskList;
+    private JList taskList;
     private JTextField titleField;
     private JButton addButton;
-    private JTextField indexField;
     private JButton markDoneButton;
     private JButton removeButton;
 
     ArrayList<TaskItem> tasks = new ArrayList<>();
+    DefaultListModel model = new DefaultListModel();
 
     public MainWindow() {
+        taskList.setModel(model);
         add(mainPanel);
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -42,11 +43,9 @@ public class MainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    int ind = Integer.parseInt(indexField.getText()) - 1;
-                    if (ind >= tasks.size()) {
-                        JOptionPane.showMessageDialog(mainPanel, "Invalid index", "Error", JOptionPane.ERROR_MESSAGE);
+                    int ind = taskList.getSelectedIndex();
+                    if (ind == -1)
                         return;
-                    }
                     tasks.get(ind).done = true;
                     updateTaskList();
                 } catch (NumberFormatException | IOException err) {
@@ -58,11 +57,9 @@ public class MainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    int ind = Integer.parseInt(indexField.getText()) - 1;
-                    if (ind >= tasks.size()) {
-                        JOptionPane.showMessageDialog(mainPanel, "Invalid index", "Error", JOptionPane.ERROR_MESSAGE);
+                    int ind = taskList.getSelectedIndex();
+                    if (ind == -1)
                         return;
-                    }
                     tasks.remove(ind);
                     updateTaskList();
                 } catch (NumberFormatException | IOException err) {
@@ -96,18 +93,17 @@ public class MainWindow extends JFrame {
     }
 
     void updateTaskList() throws IOException {
-        String content = "";
+        model.clear();
         for (int i = 0; i < tasks.size(); i++) {
+            String content = "";
             TaskItem item = tasks.get(i);
             content += (i + 1) + ": " + item.title;
             if (item.done) {
                 content += " (DONE)";
             }
-            if (i != tasks.size() - 1) {
-                content += "\n";
-            }
+            model.add(i, content);
+
         }
-        taskList.setText(content);
         saveTaskList();
     }
 
